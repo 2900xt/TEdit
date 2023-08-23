@@ -15,6 +15,7 @@ public class Main
     public static JTextPane textArea;
     public static Theme currentTheme;
     public static Style textStyle, keywordStyle, preprocessorStyle;
+    public static OutputConsole outputConsole;
 
     public static void main(String[] args) 
     {
@@ -30,6 +31,8 @@ public class Main
 
             textArea = new JTextPane();
             textArea.setEditable(false);
+
+            outputConsole = new OutputConsole();
 
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setBounds(10, 10, mainFrame.getWidth() - 40, mainFrame.getHeight() - 300);
@@ -77,6 +80,7 @@ public class Main
 
             mainFrame.setJMenuBar(menuBar);
             mainFrame.add(scrollPane);
+            outputConsole.AddToFrame(mainFrame);
             statusBar.AddToFrame(mainFrame);
 
             mainFrame.setVisible(true);
@@ -118,6 +122,10 @@ public class Main
         keywordStyle = textArea.addStyle("KeywordStyle", null);
         StyleConstants.setForeground(keywordStyle, theme.keywordColor);
 
+        outputConsole.textStyle = outputConsole.consoleOutput.addStyle("TextStyle", null);
+        StyleConstants.setForeground(outputConsole.textStyle, theme.consoleText);
+        outputConsole.consoleOutput.setBackground(theme.consoleBg);
+
         mainFrame.repaint();
     }
 
@@ -138,7 +146,6 @@ public class Main
 
 
         String word = textArea.getText().substring(wordStartIndex, wordEndIndex);
-        System.out.println("Word:" + wordStartIndex + ", " + wordEndIndex);
 
         for(String k : Theme.keywords)
         {
@@ -178,7 +185,6 @@ public class Main
             if(wordEndIndex == -1) break;
 
             String word = textArea.getText().substring(wordStartIndex, wordEndIndex);
-            System.out.println("Word:" + wordStartIndex + ", " + wordEndIndex);
 
             for(String k : Theme.keywords)
             {

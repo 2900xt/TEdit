@@ -1,9 +1,7 @@
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TEditMenuBar extends JMenuBar
@@ -65,71 +63,55 @@ public class TEditMenuBar extends JMenuBar
 
     public int Build()
     {
-        AtomicInteger exitCode = new AtomicInteger();
-        Thread t = new Thread(() -> {
-            try {
-                ProcessBuilder processBuilder = new ProcessBuilder("C:\\MinGW\\bin\\g++", Main.currentFilePath, "-o", "C:\\Users\\1038493\\Documents\\a.exe");
-                processBuilder.redirectErrorStream(true);
-                Process program = processBuilder.start();
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(program.getInputStream()));
-                while(program.isAlive())
-                {
-                    String line = reader.readLine();
-                    if(line == null)
-                    {
-                        continue;
-                    }
-                    Main.outputConsole.WriteString(line + '\n');
-                }
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("C:\\MinGW\\bin\\g++", Main.currentFilePath, "-o", "C:\\Users\\1038493\\Documents\\a.exe");
+            processBuilder.redirectErrorStream(true);
+            Process program = processBuilder.start();
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(program.getInputStream()));
 
-                program.waitFor();
-                Main.outputConsole.WriteString("\nBuild exited with code " + program.exitValue() + '\n');
-                exitCode.set(program.exitValue());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            String line;
+            while((line = reader.readLine()) != null)
+            {
+                Main.outputConsole.WriteString(line + '\n');
             }
-        });
 
-        t.start();
-        while(t.isAlive());
+            reader.close();
+            program.waitFor();
 
-        return exitCode.get();
+            Main.outputConsole.WriteString("\nBuild exited with code " + program.exitValue() + '\n');
+            return program.exitValue();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void Run()
     {
-        if(Build() != 1)
+        new Thread( () ->
         {
-            return;
-        }
+            Main.outputConsole.clear();
+            Build();
 
-
-
-        Thread t = new Thread(() -> {
             try
             {
                 Process program = Runtime.getRuntime().exec( new String[]{"C:\\Users\\1038493\\Documents\\a.exe"});
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(program.getInputStream()));
-                while(program.isAlive())
+
+                String line;
+                while((line = reader.readLine()) != null)
                 {
-                    String line;
-                    if((line = reader.readLine()) == null)
-                    {
-                        continue;
-                    }
                     Main.outputConsole.WriteString(line + '\n');
                 }
 
+                reader.close();
                 program.waitFor();
                 Main.outputConsole.WriteString(String.format("\nProcess exited with code 0x%X\n", program.exitValue()));
             } catch (IOException | BadLocationException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        });
-
-        t.start();
+        }).start();
     }
     public JMenuItem[] fileOptions = new JMenuItem[]
             {

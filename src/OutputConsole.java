@@ -23,6 +23,11 @@ public class OutputConsole
         frame.add(consoleScroll);
     }
 
+    public void clear()
+    {
+        consoleOutput.setText("");
+    }
+
     public void WriteString(String data) throws BadLocationException
     {
         consoleOutput.getStyledDocument().insertString(consoleOutput.getStyledDocument().getLength(), data, consoleOutput.getStyledDocument().getStyle("TextStyle"));

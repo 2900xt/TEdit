@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
@@ -114,10 +115,10 @@ public class Main
         statusBar.currentFile.setForeground(currentTheme.status);
 
         textStyle = textArea.addStyle("TextStyle", null);
-        StyleConstants.setForeground(textStyle, theme.textColor);
+        StyleConstants.setForeground(textStyle, Color.white);
 
         preprocessorStyle = textArea.addStyle("PreprocessorStyle", null);
-        StyleConstants.setForeground(textStyle, theme.preprocessorColor);
+        StyleConstants.setForeground(preprocessorStyle, theme.preprocessorColor);
 
         keywordStyle = textArea.addStyle("KeywordStyle", null);
         StyleConstants.setForeground(keywordStyle, theme.keywordColor);
@@ -131,6 +132,15 @@ public class Main
 
     public static void Append(String s) throws BadLocationException
     {
+
+        int enterInd = textArea.getText().lastIndexOf('\n', textArea.getCaretPosition());
+
+        if((textArea.getText().length() > enterInd + 1  && textArea.getText().charAt(enterInd + 1) == '#') || s.equals("#"))
+        {
+            textArea.getStyledDocument().insertString(textArea.getCaretPosition(), s, preprocessorStyle);
+            return;
+        }
+
         textArea.getStyledDocument().insertString(textArea.getCaretPosition(), s, textStyle);
         if(s.equals(" "))
         {
@@ -199,7 +209,14 @@ public class Main
 
     public static void DeleteChar() throws BadLocationException
     {
+        if(textArea.getSelectedText() != null)
+        {
+            textArea.getStyledDocument().remove(textArea.getSelectionStart(), textArea.getSelectionEnd() - textArea.getSelectionStart());
+            return;
+        }
+        
         if(textArea.getCaretPosition() == 0) return;
+
         textArea.getStyledDocument().remove(textArea.getCaretPosition() - 1, 1);
     }
 
